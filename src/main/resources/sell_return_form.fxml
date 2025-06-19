@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="350.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.inettel.cassa.SellReturnFormController">
+   <children>
+      <Label fx:id="serviceLabel" alignment="CENTER" layoutX="25.0" layoutY="200.0" prefHeight="30.0" prefWidth="129.0" text="Услуга" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0">
+         <font>
+            <Font name="System Bold" size="22.0" />
+         </font>
+      </Label>
+      <Button fx:id="doReturnBtn" disable="true" layoutX="246.0" layoutY="348.0" mnemonicParsing="false" text="Возврат" />
+      <Button fx:id="closeBtn" layoutX="41.0" layoutY="348.0" mnemonicParsing="false" text="Закрыть" />
+      <TitledPane fx:id="abonentInfoPane" animated="false" layoutX="14.0" layoutY="14.0" prefHeight="161.0" prefWidth="336.0" text="Абонент" AnchorPane.leftAnchor="7.0" AnchorPane.rightAnchor="7.0" AnchorPane.topAnchor="7.0">
+        <content>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="127.0" prefWidth="334.0">
+               <children>
+                  <Label layoutX="11.0" layoutY="14.0" text="ФИО:" AnchorPane.leftAnchor="0.0">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Label layoutX="13.0" layoutY="43.0" text="Адрес:" AnchorPane.leftAnchor="0.0">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Label layoutX="13.0" layoutY="68.0" text="Л.С.:" AnchorPane.leftAnchor="0.0">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="nameLabel" layoutX="72.0" layoutY="14.0" prefHeight="18.0" prefWidth="248.0" text="Сорокин Константин Олегович">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="addressLabel" layoutX="72.0" layoutY="43.0" prefHeight="18.0" prefWidth="248.0" text="Автомобилистов 3-57">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="accountLabel" layoutX="72.0" layoutY="68.0" prefHeight="18.0" prefWidth="248.0" text="1234">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="phoneTf" layoutX="20.0" layoutY="93.0" promptText="Телефон" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" />
+               </children>
+            </AnchorPane>
+        </content>
+      </TitledPane>
+      <TextField fx:id="cashTextField" alignment="CENTER_RIGHT" layoutX="90.0" layoutY="262.0"  prefHeight="45.0" prefWidth="175.0" promptText="Наличные" AnchorPane.leftAnchor="90.0" AnchorPane.rightAnchor="90.0">
+         <font>
+            <Font size="24.0" />
+         </font></TextField>
+   </children>
+</AnchorPane>

@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: ru.atol.drivers10.fptr:libfptr10:10.1.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/ru/atol/drivers10/fptr/libfptr10/10.1.0/libfptr10-10.1.0.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/ru/atol/drivers10/fptr/libfptr10/10.1.0/libfptr10-10.1.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/ru/atol/drivers10/fptr/libfptr10/10.1.0/libfptr10-10.1.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
