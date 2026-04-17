@@ -2,12 +2,20 @@
   <artifact type="jar" name="сassa:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/cassa_jar</output-path>
     <root id="archive" name="сassa.jar">
-      <element id="module-output" name="сassa" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/javax/resource/connector-api/1.5/connector-api-1.5.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/mysql/mysql-connector-java/6.0.6/mysql-connector-java-6.0.6.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/antlr/antlr4-runtime/4.7/antlr4-runtime-4.7.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/firebirdsql/jdbc/jaybird-jdk18/3.0.1/jaybird-jdk18-3.0.1.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/sun/jna/jna/3.0.9/jna-3.0.9.jar" path-in-jar="/" />
+      <element id="module-output" name="cassa" />
+      <element id="library" level="project" name="Maven: org.firebirdsql.jdbc:jaybird-jdk18:3.0.1" />
+      <element id="library" level="project" name="Maven: javax.resource:connector-api:1.5" />
+      <element id="library" level="project" name="Maven: org.antlr:antlr4-runtime:4.7" />
+      <element id="library" level="project" name="Maven: com.sun.jna:jna:3.0.9" />
+      <element id="library" level="project" name="Maven: mysql:mysql-connector-java:6.0.6" />
+      <element id="library" level="module" name="Maven: com.oracle:javafx:8" module-name="cassa" />
+      <element id="library" level="project" name="Maven: org.controlsfx:controlsfx:8.40.12" />
+      <element id="library" level="project" name="Maven: ru.atol.drivers10.fptr:libfptr10:10.1.0" />
     </root>
   </artifact>
 </component>

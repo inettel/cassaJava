@@ -8,61 +8,84 @@
     <artifactId>cassa</artifactId>
     <version>3.0</version>
 
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12 -->
+        <!-- Логирование (только для тестов) -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.7.25</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- Firebird JDBC -->
         <dependency>
             <groupId>org.firebirdsql.jdbc</groupId>
             <artifactId>jaybird-jdk18</artifactId>
             <version>3.0.1</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.sun.jna/jna -->
+
+        <!-- JNA -->
         <dependency>
             <groupId>com.sun.jna</groupId>
             <artifactId>jna</artifactId>
             <version>3.0.9</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+
+        <!-- MySQL Connector -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>6.0.6</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.controlsfx/controlsfx -->
+
+        <!-- JavaFX 8 (из jfxrt.jar) -->
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>javafx</artifactId>
+            <version>8</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/User/Downloads/bellsoft-jdk8u482+10-windows-amd64-full/jdk8u482-full/jre/lib/ext/jfxrt.jar</systemPath>
+        </dependency>
+
+        <!-- ControlsFX -->
         <dependency>
             <groupId>org.controlsfx</groupId>
             <artifactId>controlsfx</artifactId>
             <version>8.40.12</version>
         </dependency>
-        <!-- Local atol drivers-->
+
+        <!-- ATOL Drivеrs 10 -->
         <dependency>
             <groupId>ru.atol.drivers10.fptr</groupId>
             <artifactId>libfptr10</artifactId>
             <version>10.1.0</version>
         </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
+            <!-- Компиляция для Java 8 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.1</version>
+                <version>3.11.0</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
             </plugin>
+
+            <!-- Сборка одного JAR со всеми зависимностями -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.3.0</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -72,9 +95,21 @@
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <attach>true</attach>
+                    <!-- КРИТИЧНО: включаем system-зависимости (jfxrt.jar) -->
+                    <includeSystemScope>true</includeSystemScope>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
-
 </project>
