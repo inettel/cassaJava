@@ -44,13 +44,13 @@
             <version>6.0.6</version>
         </dependency>
 
-        <!-- JavaFX 8 через jfxrt.jar (входит в JDK 8 Full) -->
+        <!-- JavaFX 8 через jfxrt.jar (явный путь) -->
         <dependency>
             <groupId>com.oracle</groupId>
             <artifactId>javafx</artifactId>
             <version>8</version>
             <scope>system</scope>
-            <systemPath>${java.home}/lib/ext/jfxrt.jar</systemPath>
+            <systemPath>C:/Java/jdk8u482-full/jre/lib/ext/jfxrt.jar</systemPath>
         </dependency>
 
         <!-- ControlsFX -->
@@ -84,32 +84,40 @@
             <!-- Сборка одного JAR со всеми зависимностями -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.3.0</version>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.0</version>
                 <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>ru.inettel.cassa.Main</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <appendAssemblyId>false</appendAssemblyId>
-                    <attach>true</attach>
-                    <!-- КРИТИЧНО: включить system-зависимости (jfxrt.jar) -->
+                    <!-- ВАЖНО: включаем system-зависимости -->
                     <includeSystemScope>true</includeSystemScope>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>ru.inettel.cassa.Main</mainClass>
+                                </transformer>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
 </project>
+
+
