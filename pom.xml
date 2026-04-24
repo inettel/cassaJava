@@ -15,7 +15,7 @@
     </properties>
 
     <dependencies>
-        <!-- Логирование (только для тестов) -->
+        <!-- Логирование -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
@@ -44,13 +44,13 @@
             <version>6.0.6</version>
         </dependency>
 
-        <!-- JavaFX 8 (из jfxrt.jar) -->
+        <!-- JavaFX 8 через jfxrt.jar (входит в JDK 8 Full) -->
         <dependency>
             <groupId>com.oracle</groupId>
             <artifactId>javafx</artifactId>
             <version>8</version>
             <scope>system</scope>
-            <systemPath>C:/Users/User/Downloads/bellsoft-jdk8u482+10-windows-amd64-full/jdk8u482-full/jre/lib/ext/jfxrt.jar</systemPath>
+            <systemPath>${java.home}/lib/ext/jfxrt.jar</systemPath>
         </dependency>
 
         <!-- ControlsFX -->
@@ -60,7 +60,7 @@
             <version>8.40.12</version>
         </dependency>
 
-        <!-- ATOL Drivеrs 10 -->
+        <!-- ATOL Drivers 10 -->
         <dependency>
             <groupId>ru.atol.drivers10.fptr</groupId>
             <artifactId>libfptr10</artifactId>
@@ -70,7 +70,7 @@
 
     <build>
         <plugins>
-            <!-- Компиляция для Java 8 -->
+            <!-- Компиляция под Java 8 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -97,7 +97,7 @@
                     </descriptorRefs>
                     <appendAssemblyId>false</appendAssemblyId>
                     <attach>true</attach>
-                    <!-- КРИТИЧНО: включаем system-зависимости (jfxrt.jar) -->
+                    <!-- КРИТИЧНО: включить system-зависимости (jfxrt.jar) -->
                     <includeSystemScope>true</includeSystemScope>
                 </configuration>
                 <executions>

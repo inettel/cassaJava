@@ -1,26 +1,23 @@
 package ru.inettel.cassa;
 
+import java.util.Iterator;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import ru.atol.drivers10.fptr.IFptr;
 import ru.inettel.cassa.kkm.AtolKkm;
 import ru.inettel.cassa.kkm.KkmExeption;
 import ru.inettel.cassa.user.User;
 
-/**
- * Created by ksork on 01.07.17.
- */
 public class PaymentFormController {
-
     User user;
     double price;
     double cash;
     double delivery;
-
     @FXML
-    private  TextField phoneTf;
+    private TextField phoneTf;
     @FXML
     private Label priceLabel;
     @FXML
@@ -32,62 +29,57 @@ public class PaymentFormController {
     @FXML
     private Button closeBtn;
 
+    public PaymentFormController() {
+    }
+
     @FXML
     public void initialize() {
-        for (User user: MainFormController.getPaymentList()){
-            price += user.getCashIn();
+        User user;
+        for(Iterator var1 = MainFormController.getPaymentList().iterator(); var1.hasNext(); this.price += user.getCashIn()) {
+            user = (User)var1.next();
         }
-        priceLabel.setText(price + " руб.");
 
-        // Делаем cashTextField numeric-only
-        cashTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+        this.priceLabel.setText(this.price + " руб.");
+        this.cashTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) {
-                cashTextField.setText(newValue.replaceAll("[^\\d]", ""));
+                this.cashTextField.setText(newValue.replaceAll("[^\\d]", ""));
             }
 
-            // Расчет сдачи
-            if (cashTextField.getText().isEmpty())
-                cash = 0;
-            else
-                cash = Double.parseDouble(cashTextField.getText());
+            if (this.cashTextField.getText().isEmpty()) {
+                this.cash = 0.0;
+            } else {
+                this.cash = Double.parseDouble(this.cashTextField.getText());
+            }
 
-            delivery = cash - price;
-            deliveryLabel.setText(String.valueOf(delivery));
-            payBtn.setDisable(delivery < 0 );
-
+            this.delivery = this.cash - this.price;
+            this.deliveryLabel.setText(String.valueOf(this.delivery));
+            this.payBtn.setDisable(this.delivery < 0.0);
         });
-        Platform.runLater(() -> cashTextField.requestFocus());
+        Platform.runLater(() -> {
+            this.cashTextField.requestFocus();
+        });
     }
 
-
     @FXML
-    private void doPay(){
-        if (delivery < 0 || cash == 0) return;
-        payBtn.setDisable(true);
-        String phone = phoneTf.getText();
-        try {
-            AtolKkm.pay(MainFormController.getPaymentList(), cash, IFptr.LIBFPTR_PT_CASH, phone);
-        } catch (KkmExeption e){
-            ErrorMessage.show(e);
-            payBtn.setDisable(false);
+    private void doPay() {
+        if (!(this.delivery < 0.0) && this.cash != 0.0) {
+            this.payBtn.setDisable(true);
+            String phone = this.phoneTf.getText();
+
+            try {
+                AtolKkm.pay(MainFormController.getPaymentList(), this.cash, 0, phone);
+            } catch (KkmExeption var3) {
+                KkmExeption e = var3;
+                ErrorMessage.show(e);
+                this.payBtn.setDisable(false);
+            }
+
         }
-// String account = user.getAccount();
-//        String service = user.getService();
-////        double price = Double.parseDouble(MainFormController.getSum());
-//        double cash = Double.parseDouble(cashTextField.getText());
-//        try {
-////            AtolKkm.pay(user, account, price, cash, service, phone);
-////            user.pay(price);
-//            close();
-//        } catch (KkmExeption e){
-//            ErrorMessage.show(e);
-//            payBtn.setDisable(false);
-//        }
     }
 
     @FXML
-    private void close(){
-        Stage stage = (Stage) closeBtn.getScene().getWindow();
+    private void close() {
+        Stage stage = (Stage)this.closeBtn.getScene().getWindow();
         stage.close();
     }
 }

@@ -1,6 +1,10 @@
 package ru.inettel.cassa;
 
-import javafx.application.Platform;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -9,10 +13,16 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
@@ -26,32 +36,13 @@ import ru.inettel.cassa.user.AtirraUser;
 import ru.inettel.cassa.user.User;
 import ru.inettel.cassa.user.UtmUser;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-/**
- * Created by ksork on 29.06.17.
- */
 public class MainFormController {
-
-    //    private ObservableList<String> streets = ConfigHelper.getStreets();
     private List<String> streets = ConfigHelper.getStreets();
     private Set<String> names = DAOHelper.selectNames();
     private ObservableList<User> usersList = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
     private static ObservableList<User> paymentList = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
     private static User selectedUser;
     private static String sum;
-
-    public static ObservableList<User> getPaymentList() {
-        return paymentList;
-    }
-
-    public static User getSelectedUser() {
-        return selectedUser;
-    }
-
     @FXML
     private AnchorPane ap;
     @FXML
@@ -94,7 +85,6 @@ public class MainFormController {
     private TableColumn<User, String> nameTableColumn;
     @FXML
     private TableColumn<User, String> tariffTableColumn;
-
     @FXML
     private TableView<User> paymentTable;
     @FXML
@@ -116,266 +106,322 @@ public class MainFormController {
     @FXML
     private TableColumn<User, String> tariffPaymentTableColumn;
 
+    public MainFormController() {
+    }
+
+    public static ObservableList<User> getPaymentList() {
+        return paymentList;
+    }
+
+    public static User getSelectedUser() {
+        return selectedUser;
+    }
+
     @FXML
     public void initialize() {
-        TextFields.bindAutoCompletion(streetTextField, streets);
-        TextFields.bindAutoCompletion(nameTextField, names);
-        serviceTableColumn.setCellValueFactory(cellData -> cellData.getValue().serviceProperty());
-        accountTableColumn.setCellValueFactory(cellData -> cellData.getValue().accountProperty());
-        balanceTableColumn.setCellValueFactory(cellData -> cellData.getValue().balanceProperty().asObject());
-        streetTableColumn.setCellValueFactory(cellData -> cellData.getValue().streetProperty());
-        houseTableColumn.setCellValueFactory(cellData -> cellData.getValue().houseProperty());
-        flatTableColumn.setCellValueFactory(cellData -> cellData.getValue().flatProperty());
-        nameTableColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        tariffTableColumn.setCellValueFactory(cellData -> cellData.getValue().tariffProperty());
-
-        mainTable.setPlaceholder(new Label());
-        mainTable.setItems(usersList);
-
-        // Автовыделение всего текста при фокусе
-        streetTextField.focusedProperty().addListener(new TextFieldFocusListener(streetTextField));
-        houseTextField.focusedProperty().addListener(new TextFieldFocusListener(houseTextField));
-        flatTextField.focusedProperty().addListener(new TextFieldFocusListener(flatTextField));
-        accountTextField.focusedProperty().addListener(new TextFieldFocusListener(accountTextField));
-        nameTextField.focusedProperty().addListener(new TextFieldFocusListener(nameTextField));
-
-        mainTable.setRowFactory( tv -> {
-            TableRow<User> row = new TableRow<>();
-            row.setOnMouseClicked(event -> {
-                if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
-                    User user = row.getItem();
+        TextFields.bindAutoCompletion(this.streetTextField, this.streets);
+        TextFields.bindAutoCompletion(this.nameTextField, this.names);
+        this.serviceTableColumn.setCellValueFactory((cellData) -> {
+            return ((User)cellData.getValue()).serviceProperty();
+        });
+        this.accountTableColumn.setCellValueFactory((cellData) -> {
+            return ((User)cellData.getValue()).accountProperty();
+        });
+        this.balanceTableColumn.setCellValueFactory((cellData) -> {
+            return ((User)cellData.getValue()).balanceProperty().asObject();
+        });
+        this.streetTableColumn.setCellValueFactory((cellData) -> {
+            return ((User)cellData.getValue()).streetProperty();
+        });
+        this.houseTableColumn.setCellValueFactory((cellData) -> {
+            return ((User)cellData.getValue()).houseProperty();
+        });
+        this.flatTableColumn.setCellValueFactory((cellData) -> {
+            return ((User)cellData.getValue()).flatProperty();
+        });
+        this.nameTableColumn.setCellValueFactory((cellData) -> {
+            return ((User)cellData.getValue()).nameProperty();
+        });
+        this.tariffTableColumn.setCellValueFactory((cellData) -> {
+            return ((User)cellData.getValue()).tariffProperty();
+        });
+        this.mainTable.setPlaceholder(new Label());
+        this.mainTable.setItems(this.usersList);
+        this.streetTextField.focusedProperty().addListener(new TextFieldFocusListener(this.streetTextField));
+        this.houseTextField.focusedProperty().addListener(new TextFieldFocusListener(this.houseTextField));
+        this.flatTextField.focusedProperty().addListener(new TextFieldFocusListener(this.flatTextField));
+        this.accountTextField.focusedProperty().addListener(new TextFieldFocusListener(this.accountTextField));
+        this.nameTextField.focusedProperty().addListener(new TextFieldFocusListener(this.nameTextField));
+        this.mainTable.setRowFactory((tv) -> {
+            TableRow<User> row = new TableRow();
+            row.setOnMouseClicked((event) -> {
+                if (event.getClickCount() == 2 && !row.isEmpty()) {
+                    User user = (User)row.getItem();
                     Dialog dialog = new TextInputDialog("");
-                    dialog.setTitle("Сумма");
-                    dialog.setHeaderText("Сумма оплаты");
-                    Optional<String> result = dialog.showAndWait();
-                    if (result.isPresent()){
+                    ((Dialog)dialog).setTitle("Сумма");
+                    ((Dialog)dialog).setHeaderText("Сумма оплаты");
+                    Optional<String> result = ((Dialog)dialog).showAndWait();
+                    if (result.isPresent()) {
                         try {
-                            double payment = Double.parseDouble(result.get());
-                            if (payment <= 0 ) return;
+                            double payment = Double.parseDouble((String)result.get());
+                            if (payment <= 0.0) {
+                                return;
+                            }
+
                             user.setCashIn(payment);
-                            paymentList.addAll(user);
-                            switchBtn();
-                        } catch (NumberFormatException e){
-                            // Введена неверная сумма, ничего не делаем
+                            paymentList.addAll(new User[]{user});
+                            this.switchBtn();
+                        } catch (NumberFormatException var8) {
+                        }
+                    }
+                }
+
+            });
+            return row;
+        });
+        this.serviceTableColumn.setCellFactory((column) -> {
+            return new TableCell<User, String>() {
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    String style = "";
+                    this.setText(item);
+                    if (!empty) {
+                        this.setTextFill(Color.BLACK);
+                        TableRow row = this.getTableRow();
+                        User user = (User)row.getItem();
+                        if (user != null) {
+                            if (user instanceof UtmUser) {
+                                style = user.getBalance() >= 0.0 ? "-fx-background-color: #61d7a4;" : "-fx-background-color: #ff7640;";
+                            } else if (user instanceof AtirraUser) {
+                                style = user.getBalance() >= 0.0 ? "-fx-background-color: #67e667;" : "-fx-background-color: #ff4040;";
+                            }
                         }
                     }
 
+                    this.setStyle(style);
                 }
-            });
-            return row ;
+            };
         });
-
-        //  Раскраска
-        serviceTableColumn.setCellFactory(column -> new TableCell<User, String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                String style = "";
-                setText(item);
-                if (!empty) {
-                    setTextFill(Color.BLACK);
-                    TableRow<User> row = getTableRow();
-                    User user = row.getItem();
-                    if (user != null) {
-                        if (user instanceof UtmUser)
-                            style = user.getBalance() >= 0 ? "-fx-background-color: #61d7a4;" : "-fx-background-color: #ff7640;";
-                        else if (user instanceof AtirraUser)
-                            style = user.getBalance() >= 0 ? "-fx-background-color: #67e667;" : "-fx-background-color: #ff4040;";
-                    }
-                }
-                setStyle(style);
-            }
+        this.switchBtn();
+        this.flatTableColumn.setComparator(new StringAsNumberComparator());
+        this.houseTableColumn.setComparator(new StringAsNumberComparator());
+        this.accountTableColumn.setComparator(new StringAsNumberComparator());
+        this.nameTableColumn.setComparator((a, b) -> {
+            return a.compareTo(b);
         });
-
-
-        switchBtn();
-
-        flatTableColumn.setComparator(new StringAsNumberComparator());
-        houseTableColumn.setComparator(new StringAsNumberComparator());
-        accountTableColumn.setComparator(new StringAsNumberComparator());
-        nameTableColumn.setComparator((a, b) -> a.compareTo(b));
-
-        // Таблица платежей
-        servicePaymentTableColumn.setCellValueFactory(cellData -> cellData.getValue().serviceProperty());
-        accountPaymentTableColumn.setCellValueFactory(cellData -> cellData.getValue().accountProperty());
-        balancePaymentTableColumn.setCellValueFactory(cellData -> cellData.getValue().balanceProperty().asObject());
-        cashInPaymentTableColumn.setCellValueFactory(cellDate -> cellDate.getValue().cashInProperty().asObject());
-        streetPaymentTableColumn.setCellValueFactory(cellData -> cellData.getValue().streetProperty());
-        housePaymentTableColumn.setCellValueFactory(cellData -> cellData.getValue().houseProperty());
-        flatPaymentTableColumn.setCellValueFactory(cellData -> cellData.getValue().flatProperty());
-        namePaymentTableColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        tariffPaymentTableColumn.setCellValueFactory(cellData -> cellData.getValue().tariffProperty());
-
-        paymentTable.setPlaceholder(new Label());
-        paymentTable.setItems(paymentList);
+        this.servicePaymentTableColumn.setCellValueFactory((cellData) -> {
+            return ((User)cellData.getValue()).serviceProperty();
+        });
+        this.accountPaymentTableColumn.setCellValueFactory((cellData) -> {
+            return ((User)cellData.getValue()).accountProperty();
+        });
+        this.balancePaymentTableColumn.setCellValueFactory((cellData) -> {
+            return ((User)cellData.getValue()).balanceProperty().asObject();
+        });
+        this.cashInPaymentTableColumn.setCellValueFactory((cellDate) -> {
+            return ((User)cellDate.getValue()).cashInProperty().asObject();
+        });
+        this.streetPaymentTableColumn.setCellValueFactory((cellData) -> {
+            return ((User)cellData.getValue()).streetProperty();
+        });
+        this.housePaymentTableColumn.setCellValueFactory((cellData) -> {
+            return ((User)cellData.getValue()).houseProperty();
+        });
+        this.flatPaymentTableColumn.setCellValueFactory((cellData) -> {
+            return ((User)cellData.getValue()).flatProperty();
+        });
+        this.namePaymentTableColumn.setCellValueFactory((cellData) -> {
+            return ((User)cellData.getValue()).nameProperty();
+        });
+        this.tariffPaymentTableColumn.setCellValueFactory((cellData) -> {
+            return ((User)cellData.getValue()).tariffProperty();
+        });
+        this.paymentTable.setPlaceholder(new Label());
+        this.paymentTable.setItems(paymentList);
     }
 
     public void disableFindBtn(boolean status) {
-        findBtn.setDisable(status);
+        this.findBtn.setDisable(status);
     }
 
     @FXML
     private void clear() {
-        streetTextField.clear();
-        houseTextField.clear();
-        flatTextField.clear();
-        nameTextField.clear();
-        accountTextField.clear();
+        this.streetTextField.clear();
+        this.houseTextField.clear();
+        this.flatTextField.clear();
+        this.nameTextField.clear();
+        this.accountTextField.clear();
         paymentList.clear();
     }
 
     @FXML
     private void searchClient() {
         SearchData searchData = new SearchData();
-        searchData.setStreet(streetTextField.getText().trim());
-        searchData.setHouse(houseTextField.getText().trim());
-        searchData.setFlat(flatTextField.getText().trim());
-        searchData.setName(nameTextField.getText().trim());
-        searchData.setAccount(accountTextField.getText().trim());
-        searchData.setInet(inetCheckBox.isSelected());
-        searchData.setTv(tvCheckBox.isSelected());
-        usersList.clear();
-        disableFindBtn(true);
-        DAOHelper.searcUsers(searchData, usersList, this);
-        findBtnSetFocus();
-        mainTable.refresh();
-        refreshNames();
+        searchData.setStreet(this.streetTextField.getText().trim());
+        searchData.setHouse(this.houseTextField.getText().trim());
+        searchData.setFlat(this.flatTextField.getText().trim());
+        searchData.setName(this.nameTextField.getText().trim());
+        searchData.setAccount(this.accountTextField.getText().trim());
+        searchData.setInet(this.inetCheckBox.isSelected());
+        searchData.setTv(this.tvCheckBox.isSelected());
+        this.usersList.clear();
+        this.disableFindBtn(true);
+        DAOHelper.searcUsers(searchData, this.usersList, this);
+        this.findBtnSetFocus();
+        this.mainTable.refresh();
+        this.refreshNames();
     }
 
     @FXML
     private void findBtnSetFocus() {
-        findBtn.requestFocus();
+        this.findBtn.requestFocus();
     }
 
     @FXML
     private void doPay(Event event) {
-//        User user = mainTable.getSelectionModel().getSelectedItem();
-//        MainFormController.selectedUser = user;
-//        MainFormController.sum = sum;
-//
         Parent parent = null;
+
         try {
-            parent = FXMLLoader.load(getClass().getClassLoader().getResource("payment_form.fxml"));
+            parent = (Parent)FXMLLoader.load(this.getClass().getClassLoader().getResource("payment_form.fxml"));
             Stage stage = new Stage();
             stage.setTitle("Платеж");
-            stage.setScene(new Scene(parent, 350, 240));
+            stage.setScene(new Scene(parent, 350.0, 240.0));
             stage.setResizable(false);
             stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(((Node) event.getSource()).getScene().getWindow());
+            stage.initOwner(((Node)event.getSource()).getScene().getWindow());
             stage.showAndWait();
-            Thread.sleep(500);
-            clearCheck();
-            searchClient();
-        } catch (IOException e) {
+            Thread.sleep(500L);
+            this.clearCheck();
+            this.searchClient();
+        } catch (IOException var4) {
+            IOException e = var4;
             e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException var5) {
+            InterruptedException e = var5;
             e.printStackTrace();
         }
+
     }
 
     @FXML
-    private void doPayCard(Event event){
+    private void doPayCard(Event event) {
         Card.pay();
+
         try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
+            Thread.sleep(500L);
+        } catch (InterruptedException var3) {
+            InterruptedException e = var3;
             e.printStackTrace();
         }
-        clearCheck();
-        searchClient();
+
+        this.clearCheck();
+        this.searchClient();
     }
 
     @FXML
-    public void clearCheck(){
+    public void clearCheck() {
         paymentList.clear();
-        switchBtn();
+        this.switchBtn();
     }
 
-    private void switchBtn(){
-        clearCheckBtn.setDisable(paymentList.isEmpty());
-        cardBtn.setDisable(paymentList.isEmpty());
-        cashBtn.setDisable(paymentList.isEmpty());
+    private void switchBtn() {
+        this.clearCheckBtn.setDisable(paymentList.isEmpty());
+        this.cardBtn.setDisable(paymentList.isEmpty());
+        this.cashBtn.setDisable(paymentList.isEmpty());
     }
 
     @FXML
-    private void xReport(){
+    private void xReport() {
         try {
             AtolKkm.xReport();
-        } catch (KkmExeption e){
+        } catch (KkmExeption var2) {
+            KkmExeption e = var2;
             ErrorMessage.show(e);
         }
+
     }
 
     @FXML
-    private void closeAndShiftReport(){
+    private void closeAndShiftReport() {
         try {
             AtolKkm.closeAndShiftReport();
-        } catch (KkmExeption e){
+        } catch (KkmExeption var2) {
+            KkmExeption e = var2;
             ErrorMessage.show(e);
         }
+
     }
 
     @FXML
-    private void cashIn(){
+    private void cashIn() {
         try {
-            Parent parent = FXMLLoader.load(getClass().getClassLoader().getResource("cash_in_form.fxml"));
+            Parent parent = (Parent)FXMLLoader.load(this.getClass().getClassLoader().getResource("cash_in_form.fxml"));
             Stage stage = new Stage();
             stage.setTitle("Касса");
-            stage.setScene(new Scene(parent, 240, 180));
+            stage.setScene(new Scene(parent, 240.0, 180.0));
             stage.setResizable(false);
             stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(ap.getScene().getWindow());
+            stage.initOwner(this.ap.getScene().getWindow());
             stage.show();
-        } catch (IOException e) {
+        } catch (IOException var3) {
+            IOException e = var3;
             e.printStackTrace();
         }
 
     }
 
     @FXML
-    private void cashOut(){
+    private void cashOut() {
         try {
-            Parent parent = FXMLLoader.load(getClass().getClassLoader().getResource("cash_out_form.fxml"));
+            Parent parent = (Parent)FXMLLoader.load(this.getClass().getClassLoader().getResource("cash_out_form.fxml"));
             Stage stage = new Stage();
             stage.setTitle("Касса");
-            stage.setScene(new Scene(parent, 240, 180));
+            stage.setScene(new Scene(parent, 240.0, 180.0));
             stage.setResizable(false);
             stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(ap.getScene().getWindow());
+            stage.initOwner(this.ap.getScene().getWindow());
             stage.show();
-        } catch (IOException e) {
+        } catch (IOException var3) {
+            IOException e = var3;
             e.printStackTrace();
+        }
+
+    }
+
+    @FXML
+    private void sellReturn() {
+        User user = (User)this.mainTable.getSelectionModel().getSelectedItem();
+        if (user != null) {
+            selectedUser = user;
+
+            try {
+                Parent parent = (Parent)FXMLLoader.load(this.getClass().getClassLoader().getResource("sell_return_form.fxml"));
+                Stage stage = new Stage();
+                stage.setTitle("Возврат прихода");
+                stage.setScene(new Scene(parent, 350.0, 400.0));
+                stage.setResizable(false);
+                stage.initModality(Modality.WINDOW_MODAL);
+                stage.initOwner(this.ap.getScene().getWindow());
+                stage.showAndWait();
+                Thread.sleep(500L);
+                this.searchClient();
+            } catch (IOException var4) {
+                IOException e = var4;
+                e.printStackTrace();
+            } catch (InterruptedException var5) {
+                InterruptedException e = var5;
+                e.printStackTrace();
+            }
+
         }
     }
 
     @FXML
-    private void sellReturn(){
-        User user = mainTable.getSelectionModel().getSelectedItem();
-        if (user == null) return;
-        MainFormController.selectedUser = user;
-        try {
-            Parent parent = FXMLLoader.load(getClass().getClassLoader().getResource("sell_return_form.fxml"));
-            Stage stage = new Stage();
-            stage.setTitle("Возврат прихода");
-            stage.setScene(new Scene(parent, 350, 400));
-            stage.setResizable(false);
-            stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(ap.getScene().getWindow());
-            stage.showAndWait();
-            Thread.sleep(500);
-            searchClient();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    private void sellCorrection() {
     }
 
-    @FXML
-    private void sellCorrection(){}
-
-    private void refreshNames(){
-        names = DAOHelper.selectNames();
+    private void refreshNames() {
+        this.names = DAOHelper.selectNames();
         System.out.println("Names refresh");
     }
 }

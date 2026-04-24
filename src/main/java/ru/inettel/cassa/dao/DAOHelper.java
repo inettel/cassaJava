@@ -1,23 +1,18 @@
 package ru.inettel.cassa.dao;
 
-import javafx.collections.ObservableList;
-import ru.inettel.cassa.MainFormController;
-import ru.inettel.cassa.SearchData;
-import ru.inettel.cassa.user.AtirraUser;
-import ru.inettel.cassa.user.User;
-import ru.inettel.cassa.user.UtmUser;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javafx.collections.ObservableList;
+import ru.inettel.cassa.MainFormController;
+import ru.inettel.cassa.SearchData;
+import ru.inettel.cassa.user.User;
 
-/**
- * Created by ksork on 29.06.17.
- */
 public class DAOHelper {
-
     private ObservableList<User> usersList;
     private SearchData searchData;
     private MainFormController mainFormController;
@@ -28,112 +23,147 @@ public class DAOHelper {
         this.searchData = searchData;
         this.usersList = usersList;
         this.mainFormController = mainFormController;
-        if (this.searchData.isInet()){
+        if (this.searchData.isInet()) {
             UtmAsyncReader utmAsyncReader = new UtmAsyncReader();
-            utmTread = new Thread(utmAsyncReader);
-            utmTread.start();
+            this.utmTread = new Thread(utmAsyncReader);
+            this.utmTread.start();
         }
-        if (this.searchData.isTv()){
+
+        if (this.searchData.isTv()) {
             AtirraAsyncReader atirraAsyncReader = new AtirraAsyncReader();
-            atirraThread = new Thread(atirraAsyncReader);
-            atirraThread.start();
+            this.atirraThread = new Thread(atirraAsyncReader);
+            this.atirraThread.start();
         }
+
         DisableFindBtn disableFindBtn = new DisableFindBtn();
         Thread delayThread = new Thread(disableFindBtn);
         delayThread.start();
+
         try {
             delayThread.join();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException var7) {
+            InterruptedException e = var7;
             e.printStackTrace();
         }
+
     }
 
-    public static void searcUsers(SearchData searchData, ObservableList<User> usersList, MainFormController mainFormController){
+    public static void searcUsers(SearchData searchData, ObservableList<User> usersList, MainFormController mainFormController) {
         new DAOHelper(searchData, usersList, mainFormController);
     }
 
-    public static Set<String> selectNames(){
-        Set<String> names = new HashSet<>();
+    public static Set<String> selectNames() {
+        Set<String> names = new HashSet();
         BillingDAO utmDao = new UtmDAO();
         BillingDAO atirraDao = new AtirraDAO();
+
         try {
-            utmDao.startConnect();
-            atirraDao.startConnect();
-            Set<String> utmNames = utmDao.selectNames();
-            Set<String> atirraNames = atirraDao.selectNames();
-            utmDao.stopConnect();
-            atirraDao.stopConnect();
+            ((BillingDAO)utmDao).startConnect();
+            ((BillingDAO)atirraDao).startConnect();
+            Set<String> utmNames = ((BillingDAO)utmDao).selectNames();
+            Set<String> atirraNames = ((BillingDAO)atirraDao).selectNames();
+            ((BillingDAO)utmDao).stopConnect();
+            ((BillingDAO)atirraDao).stopConnect();
             names.addAll(utmNames);
             names.addAll(atirraNames);
-        } catch (SQLException e) {
+        } catch (SQLException var5) {
+            SQLException e = var5;
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException var6) {
+            ClassNotFoundException e = var6;
             e.printStackTrace();
-        } catch (IllegalAccessException e) {
+        } catch (IllegalAccessException var7) {
+            IllegalAccessException e = var7;
             e.printStackTrace();
-        } catch (InstantiationException e) {
+        } catch (InstantiationException var8) {
+            InstantiationException e = var8;
             e.printStackTrace();
         }
+
         return names;
     }
 
-    private class UtmAsyncReader implements Runnable{
-        @Override
+    private class DisableFindBtn implements Runnable {
+        private DisableFindBtn() {
+        }
+
         public void run() {
-            List<User> selectedUsers = new ArrayList<>();
-            BillingDAO dao = new UtmDAO();
+            DAOHelper.this.mainFormController.disableFindBtn(true);
+
             try {
-                dao.startConnect();
-                selectedUsers = dao.selectUsers(searchData);
-                dao.stopConnect();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
+                if (DAOHelper.this.utmTread != null) {
+                    DAOHelper.this.utmTread.join();
+                }
+
+                if (DAOHelper.this.atirraThread != null) {
+                    DAOHelper.this.atirraThread.join();
+                }
+            } catch (InterruptedException var2) {
+                InterruptedException e = var2;
                 e.printStackTrace();
             }
-            usersList.addAll(selectedUsers);
+
+            DAOHelper.this.mainFormController.disableFindBtn(false);
         }
     }
 
-    private class AtirraAsyncReader implements Runnable{
-        @Override
+    private class AtirraAsyncReader implements Runnable {
+        private AtirraAsyncReader() {
+        }
+
         public void run() {
-            List<User> selectedUsers = new ArrayList<>();
+            List<User> selectedUsers = new ArrayList();
             BillingDAO dao = new AtirraDAO();
+
             try {
-                dao.startConnect();
-                selectedUsers = dao.selectUsers(searchData);
-                dao.stopConnect();
-            } catch (SQLException e) {
+                ((BillingDAO)dao).startConnect();
+                selectedUsers = ((BillingDAO)dao).selectUsers(DAOHelper.this.searchData);
+                ((BillingDAO)dao).stopConnect();
+            } catch (SQLException var4) {
+                SQLException exxx = var4;
+                exxx.printStackTrace();
+            } catch (ClassNotFoundException var5) {
+                ClassNotFoundException exx = var5;
+                exx.printStackTrace();
+            } catch (IllegalAccessException var6) {
+                IllegalAccessException e = var6;
                 e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InstantiationException e) {
-                e.printStackTrace();
+            } catch (InstantiationException var7) {
+                InstantiationException ex = var7;
+                ex.printStackTrace();
             }
-            usersList.addAll(selectedUsers);
+
+            DAOHelper.this.usersList.addAll((Collection)selectedUsers);
         }
     }
 
-    private class DisableFindBtn implements Runnable{
-        @Override
+    private class UtmAsyncReader implements Runnable {
+        private UtmAsyncReader() {
+        }
+
         public void run() {
-            mainFormController.disableFindBtn(true);
+            List<User> selectedUsers = new ArrayList();
+            BillingDAO dao = new UtmDAO();
+
             try {
-                if(utmTread != null)
-                    utmTread.join();
-                if (atirraThread != null)
-                    atirraThread.join();
-            } catch (InterruptedException e) {
+                ((BillingDAO)dao).startConnect();
+                selectedUsers = ((BillingDAO)dao).selectUsers(DAOHelper.this.searchData);
+                ((BillingDAO)dao).stopConnect();
+            } catch (SQLException var4) {
+                SQLException exxx = var4;
+                exxx.printStackTrace();
+            } catch (IllegalAccessException var5) {
+                IllegalAccessException exx = var5;
+                exx.printStackTrace();
+            } catch (InstantiationException var6) {
+                InstantiationException e = var6;
                 e.printStackTrace();
+            } catch (ClassNotFoundException var7) {
+                ClassNotFoundException ex = var7;
+                ex.printStackTrace();
             }
-            mainFormController.disableFindBtn(false);
+
+            DAOHelper.this.usersList.addAll((Collection)selectedUsers);
         }
     }
 }

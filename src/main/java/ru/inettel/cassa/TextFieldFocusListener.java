@@ -6,19 +6,18 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TextField;
 
 public class TextFieldFocusListener implements ChangeListener {
-
     private TextField tf;
 
     public TextFieldFocusListener(TextField tf) {
-        super();
         this.tf = tf;
     }
 
-    @Override
     public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-
         Platform.runLater(() -> {
-            if (tf.isFocused() && !tf.getText().isEmpty()) tf.selectAll();
+            if (this.tf.isFocused() && !this.tf.getText().isEmpty()) {
+                this.tf.selectAll();
+            }
+
         });
     }
 }

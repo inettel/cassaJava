@@ -1,177 +1,176 @@
 package ru.inettel.cassa.kkm;
 
+import java.util.Iterator;
+import java.util.List;
 import ru.atol.drivers10.fptr.Fptr;
 import ru.atol.drivers10.fptr.IFptr;
 import ru.inettel.cassa.user.User;
 
-import java.util.List;
-
 public class AtolKkm {
-
     private static IFptr fptr;
     private static String tvPayment = "Кабельное ТВ, лицевой счет - ";
     private static String internetPayment = "Интернет, лицевой счет - ";
 
+    public AtolKkm() {
+    }
+
     public static void pay(List<User> users, double sum, int paymentType, String phone) throws KkmExeption {
         connect();
-        // Открытие электронного чека (с передачей телефона получателя)
-        fptr.setParam(IFptr.LIBFPTR_PARAM_RECEIPT_TYPE, IFptr.LIBFPTR_RT_SELL);
-        if (!phone.isEmpty())
+        fptr.setParam(65545, 1L);
+        if (!phone.isEmpty()) {
             fptr.setParam(1008, phone);
+        }
+
         fptr.openReceipt();
-        for (User user: users){
-            String serviceName = (user.getService().equals("Интернет")) ? internetPayment : tvPayment;
-            // Регистрация позиции
-            fptr.setParam(IFptr.LIBFPTR_PARAM_COMMODITY_NAME, serviceName + user.getAccount());
-            fptr.setParam(IFptr.LIBFPTR_PARAM_PRICE, user.getCashIn());
-            fptr.setParam(IFptr.LIBFPTR_PARAM_QUANTITY, 1);
-            fptr.setParam(IFptr.LIBFPTR_PARAM_TAX_TYPE, IFptr.LIBFPTR_TAX_NO);
-            // Услуга
-            fptr.setParam(1212, 4);
-            // Полный расчет
-            fptr.setParam(1214, 0);
+        Iterator var5 = users.iterator();
+
+        while (var5.hasNext()) {
+            User user = (User) var5.next();
+            String serviceName = user.getService().equals("Интернет") ? internetPayment : tvPayment;
+            fptr.setParam(65631, serviceName + user.getAccount());
+            fptr.setParam(65632, user.getCashIn());
+            fptr.setParam(65633, 1L);
+            fptr.setParam(65569, 6L);
+            fptr.setParam(1212, 4L);
+            fptr.setParam(1214, 0L);
             fptr.registration();
         }
+
         fptr.receiptTotal();
-        // Оплата наличными
-        fptr.setParam(IFptr.LIBFPTR_PARAM_PAYMENT_TYPE, paymentType);
-        fptr.setParam(IFptr.LIBFPTR_PARAM_PAYMENT_SUM, sum);
+        fptr.setParam(65564, (long) paymentType);
+        fptr.setParam(65565, sum);
         fptr.payment();
-        // Закрытие чека
         fptr.closeReceipt();
-        fptr.setParam(IFptr.LIBFPTR_PARAM_FN_DATA_TYPE, IFptr.LIBFPTR_FNDT_LAST_DOCUMENT);
+        fptr.setParam(65622, 5L);
         fptr.fnQueryData();
-        long fiscalNum =  fptr.getParamInt(IFptr.LIBFPTR_PARAM_DOCUMENT_NUMBER);
+        long fiscalNum = fptr.getParamInt(65598);
         disconnect();
-        for (User user: users){
+        Iterator var10 = users.iterator();
+
+        while (var10.hasNext()) {
+            User user = (User) var10.next();
             user.setFiscalNum(fiscalNum);
             user.pay(user.getCashIn());
         }
+
     }
 
     public static void pay(User user, String account, double price, double cash, String service, String phone) throws KkmExeption {
         String serviceName = tvPayment;
-        if (service.equals("Интернет"))
+        if (service.equals("Интернет")) {
             serviceName = internetPayment;
+        }
+
         connect();
-        // Открытие электронного чека (с передачей телефона получателя)
-        fptr.setParam(IFptr.LIBFPTR_PARAM_RECEIPT_TYPE, IFptr.LIBFPTR_RT_SELL);
-        if (!phone.isEmpty())
+        fptr.setParam(65545, 1L);
+        if (!phone.isEmpty()) {
             fptr.setParam(1008, phone);
+        }
+
         fptr.openReceipt();
-        // Регистрация позиции
-        fptr.setParam(IFptr.LIBFPTR_PARAM_COMMODITY_NAME, serviceName + account);
-        fptr.setParam(IFptr.LIBFPTR_PARAM_PRICE, price);
-        fptr.setParam(IFptr.LIBFPTR_PARAM_QUANTITY, 1);
-        fptr.setParam(IFptr.LIBFPTR_PARAM_TAX_TYPE, IFptr.LIBFPTR_TAX_NO);
-        // Услуга
-        fptr.setParam(1212, 4);
-        // Полный расчет
-        fptr.setParam(1214, 0);
+        fptr.setParam(65631, serviceName + account);
+        fptr.setParam(65632, price);
+        fptr.setParam(65633, 1L);
+        fptr.setParam(65569, 6L);
+        fptr.setParam(1212, 4L);
+        fptr.setParam(1214, 0L);
         fptr.registration();
-        // Регистрация итога (отрасываем копейки)
-//        fptr.setParam(IFptr.LIBFPTR_PARAM_SUM, 369.0);
         fptr.receiptTotal();
-        // Оплата наличными
-        fptr.setParam(IFptr.LIBFPTR_PARAM_PAYMENT_TYPE, IFptr.LIBFPTR_PT_CASH);
-        fptr.setParam(IFptr.LIBFPTR_PARAM_PAYMENT_SUM, cash);
+        fptr.setParam(65564, 0L);
+        fptr.setParam(65565, cash);
         fptr.payment();
-        // Закрытие чека
         fptr.closeReceipt();
-        // Запрос информации о закрытом чеке
-        fptr.setParam(IFptr.LIBFPTR_PARAM_FN_DATA_TYPE, IFptr.LIBFPTR_FNDT_LAST_DOCUMENT);
+        fptr.setParam(65622, 5L);
         fptr.fnQueryData();
-//        System.out.println(String.format("Fiscal Sign = %s", fptr.getParamString(IFptr.LIBFPTR_PARAM_FISCAL_SIGN)));
-        long fiscalNum =  fptr.getParamInt(IFptr.LIBFPTR_PARAM_DOCUMENT_NUMBER);
+        long fiscalNum = fptr.getParamInt(65598);
         user.setFiscalNum(fiscalNum);
         disconnect();
     }
 
     public static void sellReturn(User user, String account, double cash, String service, String phone) throws KkmExeption {
         String serviceName = tvPayment;
-        if (service.equals("Интернет"))
+        if (service.equals("Интернет")) {
             serviceName = internetPayment;
+        }
+
         connect();
-        // Открытие электронного чека (с передачей телефона получателя)
-        fptr.setParam(IFptr.LIBFPTR_PARAM_RECEIPT_TYPE, IFptr.LIBFPTR_RT_SELL_RETURN);
-        if (!phone.isEmpty())
+        fptr.setParam(65545, 2L);
+        if (!phone.isEmpty()) {
             fptr.setParam(1008, phone);
+        }
+
         fptr.openReceipt();
-        // Регистрация позиции
-        fptr.setParam(IFptr.LIBFPTR_PARAM_COMMODITY_NAME, serviceName + account);
-        fptr.setParam(IFptr.LIBFPTR_PARAM_PRICE, cash);
-        fptr.setParam(IFptr.LIBFPTR_PARAM_QUANTITY, 1);
-        fptr.setParam(IFptr.LIBFPTR_PARAM_TAX_TYPE, IFptr.LIBFPTR_TAX_NO);
-        // Услуга
-        fptr.setParam(1212, 4);
-        // Полный расчет
-        fptr.setParam(1214, 0);
+        fptr.setParam(65631, serviceName + account);
+        fptr.setParam(65632, cash);
+        fptr.setParam(65633, 1L);
+        fptr.setParam(65569, 6L);
+        fptr.setParam(1212, 4L);
+        fptr.setParam(1214, 0L);
         fptr.registration();
         fptr.receiptTotal();
-        // Оплата наличными
-        fptr.setParam(IFptr.LIBFPTR_PARAM_PAYMENT_TYPE, IFptr.LIBFPTR_PT_CASH);
-        fptr.setParam(IFptr.LIBFPTR_PARAM_PAYMENT_SUM, cash);
-        if(fptr.payment() < 0){
+        fptr.setParam(65564, 0L);
+        fptr.setParam(65565, cash);
+        if (fptr.payment() < 0) {
             String error = fptr.errorDescription();
             fptr.cancelReceipt();
             disconnect();
             throw new KkmExeption(error);
+        } else {
+            fptr.closeReceipt();
+            fptr.setParam(65622, 5L);
+            fptr.fnQueryData();
+            long fiscalNum = fptr.getParamInt(65598);
+            user.setFiscalNum(fiscalNum);
+            disconnect();
         }
-        // Закрытие чека
-        fptr.closeReceipt();
-        // Запрос информации о закрытом чеке
-        fptr.setParam(IFptr.LIBFPTR_PARAM_FN_DATA_TYPE, IFptr.LIBFPTR_FNDT_LAST_DOCUMENT);
-        fptr.fnQueryData();
-//        System.out.println(String.format("Fiscal Sign = %s", fptr.getParamString(IFptr.LIBFPTR_PARAM_FISCAL_SIGN)));
-        long fiscalNum =  fptr.getParamInt(IFptr.LIBFPTR_PARAM_DOCUMENT_NUMBER);
-        user.setFiscalNum(fiscalNum);
-        disconnect();
     }
 
     public static void xReport() throws KkmExeption {
         connect();
-        // Отчет Без гашения
-        fptr.setParam(IFptr.LIBFPTR_PARAM_REPORT_TYPE, IFptr.LIBFPTR_RT_X);
-        if(fptr.report() < 0)
+        fptr.setParam(65546, 1L);
+        if (fptr.report() < 0) {
             throw new KkmExeption(fptr.errorDescription());
-        disconnect();
+        } else {
+            disconnect();
+        }
     }
 
     public static void closeAndShiftReport() throws KkmExeption {
         connect();
-        // Отчет о закрытии смены
-        fptr.setParam(IFptr.LIBFPTR_PARAM_REPORT_TYPE, IFptr.LIBFPTR_RT_CLOSE_SHIFT);
-        if(fptr.report() < 0)
+        fptr.setParam(65546, 0L);
+        if (fptr.report() < 0) {
             throw new KkmExeption(fptr.errorDescription());
-        disconnect();
+        } else {
+            disconnect();
+        }
     }
 
     public static void cashIn(double sum) throws KkmExeption {
         connect();
-        fptr.setParam(IFptr.LIBFPTR_PARAM_SUM, sum);
+        fptr.setParam(65613, sum);
         fptr.cashIncome();
         disconnect();
     }
 
     public static void cashOut(double sum) throws KkmExeption {
         connect();
-        fptr.setParam(IFptr.LIBFPTR_PARAM_SUM, sum);
-        if (fptr.cashOutcome() < 0)
+        fptr.setParam(65613, sum);
+        if (fptr.cashOutcome() < 0) {
             throw new KkmExeption(fptr.errorDescription());
-        disconnect();
+        } else {
+            disconnect();
+        }
     }
 
     private static void connect() throws KkmExeption {
         fptr = new Fptr();
-        fptr.setSingleSetting(IFptr.LIBFPTR_SETTING_PORT, String.valueOf(IFptr.LIBFPTR_PORT_TCPIP));
-        fptr.setSingleSetting(IFptr.LIBFPTR_SETTING_IPADDRESS, "192.168.100.11");
-        fptr.setSingleSetting(IFptr.LIBFPTR_SETTING_IPPORT, "5555");
-        fptr.setSingleSetting(IFptr.LIBFPTR_SETTING_MODEL, String.valueOf(IFptr.LIBFPTR_MODEL_ATOL_25F));
-        fptr.setSingleSetting(IFptr.LIBFPTR_SETTING_LIBRARY_PATH, System.getProperty("java.library.path"));
+        fptr.setSingleSetting("Port", String.valueOf(2));
+        fptr.setSingleSetting("IPAddress", "192.168.100.11");
+        fptr.setSingleSetting("IPPort", "5555");
+        fptr.setSingleSetting("Model", String.valueOf(57));
+        fptr.setSingleSetting("LibraryPath", System.getProperty("java.library.path"));
         fptr.applySingleSettings();
-        // Соединение с ККТ
         if (fptr.open() == 0) {
-            // Регистрация кассира
             fptr.setParam(1021, "Норошкин В.А.");
             fptr.setParam(1203, "660300348241");
             fptr.operatorLogin();
@@ -181,7 +180,7 @@ public class AtolKkm {
         }
     }
 
-    static void disconnect(){
+    static void disconnect() {
         fptr.close();
     }
 }

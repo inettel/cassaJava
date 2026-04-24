@@ -7,9 +7,7 @@ import javafx.stage.Stage;
 import ru.inettel.cassa.kkm.AtolKkm;
 import ru.inettel.cassa.kkm.KkmExeption;
 
-
 public class CashInFormController {
-
     @FXML
     private TextField cashTf;
     @FXML
@@ -17,30 +15,42 @@ public class CashInFormController {
     @FXML
     private Button cashInBtn;
 
-    @FXML
-    public void initialize(){
-        cashTf.textProperty().addListener((observable, oldValue, newValue) ->{
-            if (!newValue.matches("\\d*")) {
-                cashTf.setText(newValue.replaceAll("[^\\d]", ""));
-            }
-            cashInBtn.setDisable(cashTf.getText().isEmpty());
-        });
-        cancelBtn.setOnAction((event) -> close());
-        cashInBtn.setOnAction((event) -> cashIn());
+    public CashInFormController() {
     }
 
-    private void cashIn(){
-        double cash = Double.parseDouble(cashTf.getText());
+    @FXML
+    public void initialize() {
+        this.cashTf.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*")) {
+                this.cashTf.setText(newValue.replaceAll("[^\\d]", ""));
+            }
+
+            this.cashInBtn.setDisable(this.cashTf.getText().isEmpty());
+        });
+        this.cancelBtn.setOnAction((event) -> {
+            this.close();
+        });
+        this.cashInBtn.setOnAction((event) -> {
+            this.cashIn();
+        });
+    }
+
+    private void cashIn() {
+        double cash = Double.parseDouble(this.cashTf.getText());
+
         try {
             AtolKkm.cashIn(cash);
-        } catch (KkmExeption e){
+        } catch (KkmExeption var4) {
+            KkmExeption e = var4;
             ErrorMessage.show(e);
         }
-        close();
+
+        this.close();
     }
 
-    private void close(){
-        Stage stage = (Stage) cancelBtn.getScene().getWindow();
+    private void close() {
+        Stage stage = (Stage)this.cancelBtn.getScene().getWindow();
         stage.close();
     }
+
 }

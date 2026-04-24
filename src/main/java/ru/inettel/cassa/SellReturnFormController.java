@@ -11,9 +11,7 @@ import ru.inettel.cassa.kkm.KkmExeption;
 import ru.inettel.cassa.user.User;
 
 public class SellReturnFormController {
-
     User user;
-
     @FXML
     private TitledPane abonentInfoPane;
     @FXML
@@ -33,44 +31,53 @@ public class SellReturnFormController {
     @FXML
     private Button closeBtn;
 
+    public SellReturnFormController() {
+    }
+
     @FXML
     public void initialize() {
-        abonentInfoPane.setCollapsible(false);
-        user = MainFormController.getSelectedUser();
-        nameLabel.setText(user.getName());
-        addressLabel.setText(user.getStreet() + " " + user.getHouse() + "-" + user.getFlat());
-        accountLabel.setText(String.valueOf(user.getAccount()));
-        serviceLabel.setText(user.getService());
-
-        // Делаем cashTextField numeric-only
-        cashTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+        this.abonentInfoPane.setCollapsible(false);
+        this.user = MainFormController.getSelectedUser();
+        this.nameLabel.setText(this.user.getName());
+        this.addressLabel.setText(this.user.getStreet() + " " + this.user.getHouse() + "-" + this.user.getFlat());
+        this.accountLabel.setText(String.valueOf(this.user.getAccount()));
+        this.serviceLabel.setText(this.user.getService());
+        this.cashTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) {
-                cashTextField.setText(newValue.replaceAll("[^\\d]", ""));
+                this.cashTextField.setText(newValue.replaceAll("[^\\d]", ""));
             }
-            doReturnBtn.setDisable(cashTextField.getText().isEmpty());
-        });
 
-        doReturnBtn.setOnAction(event -> doReturn());
-        closeBtn.setOnAction(event -> close());
+            this.doReturnBtn.setDisable(this.cashTextField.getText().isEmpty());
+        });
+        this.doReturnBtn.setOnAction((event) -> {
+            this.doReturn();
+        });
+        this.closeBtn.setOnAction((event) -> {
+            this.close();
+        });
     }
 
     private void doReturn() {
-        String account = user.getAccount();
-        String service = user.getService();
-        String phone = phoneTf.getText();
-        double cash = Double.parseDouble(cashTextField.getText());
+        String account = this.user.getAccount();
+        String service = this.user.getService();
+        String phone = this.phoneTf.getText();
+        double cash = Double.parseDouble(this.cashTextField.getText());
+
         try {
-            AtolKkm.sellReturn(user, account, cash, service, phone);
-            user.pay(0 - cash);
-        } catch (KkmExeption e) {
+            AtolKkm.sellReturn(this.user, account, cash, service, phone);
+            this.user.pay(0.0 - cash);
+        } catch (KkmExeption var10) {
+            KkmExeption e = var10;
             ErrorMessage.show(e);
         } finally {
-            close();
+            this.close();
         }
+
     }
 
     private void close() {
-        Stage stage = (Stage) closeBtn.getScene().getWindow();
+        Stage stage = (Stage)this.closeBtn.getScene().getWindow();
         stage.close();
     }
+
 }

@@ -1,38 +1,37 @@
 package ru.inettel.cassa;
 
+import java.io.IOException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-
-/**
- * Created by ksork on 28.06.17.
- */
-public class Main extends Application{
+public class Main extends Application {
+    public Main() {
+    }
 
     public static void main(String[] args) {
         launch(args);
     }
 
-    @Override
-    public void start(Stage primaryStage)  {
+    public void start(Stage primaryStage) {
         Parent root = null;
+
         try {
-            root = FXMLLoader.load(getClass().getClassLoader().getResource("main_form.fxml"));
-        } catch (IOException e) {
+            root = (Parent)FXMLLoader.load(this.getClass().getClassLoader().getResource("main_form.fxml"));
+        } catch (IOException var4) {
+            IOException e = var4;
             e.printStackTrace();
         }
+
         primaryStage.setTitle("Inettel Касса");
-        primaryStage.setMinWidth(800);
-        primaryStage.setMinHeight(400);
-        primaryStage.setScene(new Scene(root, 900, 500));
+        primaryStage.setMinWidth(800.0);
+        primaryStage.setMinHeight(400.0);
+        primaryStage.setScene(new Scene(root, 900.0, 500.0));
         primaryStage.show();
     }
 
-    @Override
     public void stop() throws Exception {
         super.stop();
         System.exit(0);

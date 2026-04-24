@@ -3,8 +3,8 @@ package ru.inettel.cassa;
 /**
  * Используется, как контейнер, для передачи данных из MainFormController в DAOHelper
  */
-public class SearchData {
 
+public class SearchData {
     private String street;
     private String house;
     private String flat;
@@ -13,8 +13,11 @@ public class SearchData {
     private boolean inet;
     private boolean tv;
 
+    public SearchData() {
+    }
+
     public String getStreet() {
-        return street;
+        return this.street;
     }
 
     public void setStreet(String street) {
@@ -22,7 +25,7 @@ public class SearchData {
     }
 
     public String getHouse() {
-        return house;
+        return this.house;
     }
 
     public void setHouse(String house) {
@@ -30,7 +33,7 @@ public class SearchData {
     }
 
     public String getFlat() {
-        return flat;
+        return this.flat;
     }
 
     public void setFlat(String flat) {
@@ -38,7 +41,7 @@ public class SearchData {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -46,7 +49,7 @@ public class SearchData {
     }
 
     public String getAccount() {
-        return account;
+        return this.account;
     }
 
     public void setAccount(String account) {
@@ -54,7 +57,7 @@ public class SearchData {
     }
 
     public boolean isInet() {
-        return inet;
+        return this.inet;
     }
 
     public void setInet(boolean inet) {
@@ -62,7 +65,7 @@ public class SearchData {
     }
 
     public boolean isTv() {
-        return tv;
+        return this.tv;
     }
 
     public void setTv(boolean tv) {
